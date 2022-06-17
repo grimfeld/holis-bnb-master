@@ -3,6 +3,7 @@ import { HiOutlineMenu, HiOutlineGlobeAlt, HiSearch } from 'react-icons/hi';
 import './Header.css';
 import { Link } from 'react-router-dom';
 import Logo from '../../assets/img/HolisBnb.png';
+import eventBus from '../../utils/EventBus';
 
 type HeaderProps = {
   children?: React.ReactNode;
@@ -17,7 +18,11 @@ const Header: React.FC<HeaderProps> = () => {
         </Link>
 
         <div className="header__center">
-          <input type="text" placeholder="Search a destination" />
+          <input
+            type="text"
+            placeholder="Search a destination"
+            onChange={(e) => eventBus.dispatch('search_input_changed', e.target.value)}
+          />
           <div className="search-button">
             <HiSearch />
           </div>
