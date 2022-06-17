@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CategoryModule } from './modules/categories/Category.module';
 import { LocationModule } from './modules/locations/Location.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { LocationModule } from './modules/locations/Location.module';
       migrationsRun: true,
     }),
     LocationModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
