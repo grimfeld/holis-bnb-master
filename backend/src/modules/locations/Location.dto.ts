@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 /**
  * This dto is used to control user inputs and make sure it is valid data to create locations.
@@ -11,14 +11,59 @@ import { IsDate, IsNumber, IsString } from 'class-validator';
 /**
  * TODO implement
  */
-export class ExampleLocationDto {
+export class CreateLocationDto {
   @IsString()
-  xxx: string;
+  title: string;
 
-  @IsDate()
-  @Type(() => Date)
-  yyyy: Date;
+  @IsString()
+  description: string;
+
+  @IsString()
+  location: string;
+
+  @IsString()
+  picture: string;
 
   @IsNumber()
-  zzzz: number;
+  price: number;
+
+  @IsNumber()
+  stars: number;
+
+  @IsNumber()
+  numberOfRooms: number;
+
+  @IsNumber()
+  categoryId: number;
+}
+
+export class UpdateLocationDto {
+  @IsString()
+  title: string;
+
+  @IsString()
+  description: string;
+
+  @IsString()
+  location: string;
+
+  @IsString()
+  picture: string;
+
+  @IsNumber()
+  price: number;
+
+  @IsNumber()
+  stars: number;
+
+  @IsNumber()
+  numberOfRooms: number;
+
+  @IsNumber()
+  categoryId: number;
+}
+
+export class ChangeLocationPriceDto {
+  @IsNumber()
+  price: number;
 }
