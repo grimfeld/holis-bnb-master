@@ -1,4 +1,3 @@
-import { Type } from 'class-transformer';
 import { IsNumber, IsString } from 'class-validator';
 
 /**
@@ -34,33 +33,7 @@ export class CreateLocationDto {
   numberOfRooms: number;
 
   @IsNumber()
-  categoryId: number;
-}
-
-export class UpdateLocationDto {
-  @IsString()
-  title: string;
-
-  @IsString()
-  description: string;
-
-  @IsString()
-  location: string;
-
-  @IsString()
-  picture: string;
-
-  @IsNumber()
-  price: number;
-
-  @IsNumber()
-  stars: number;
-
-  @IsNumber()
-  numberOfRooms: number;
-
-  @IsNumber()
-  categoryId: number;
+  categoryName: string;
 }
 
 export class ChangeLocationPriceDto {

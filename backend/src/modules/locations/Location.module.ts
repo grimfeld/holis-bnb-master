@@ -1,3 +1,4 @@
+import { Category } from './../categories/Category.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LocationController } from './Location.controller';
@@ -6,7 +7,10 @@ import { LocationService } from './Location.service';
 
 @Module({
   /** TypeOrmModule.forFeature([Location]) enables the location module to inject Typeorm Repositories for the Location entity */
-  imports: [TypeOrmModule.forFeature([Location])],
+  imports: [
+    TypeOrmModule.forFeature([Location]),
+    TypeOrmModule.forFeature([Category]),
+  ],
   controllers: [LocationController],
   providers: [LocationService],
   /** Exporting this service lets you declare LocationService in the services of Modules where you would import the LocationModule
