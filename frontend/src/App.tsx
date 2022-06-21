@@ -3,7 +3,7 @@ import SearchPage from './pages/Search/Search';
 import DisplayLocationPage from './pages/DisplayLocation/DisplayLocation';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './layouts/Layout';
-import CreateLocationPage from './pages/locations/create';
+import CreatePage from './pages/Create';
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
         <Route element={<Layout />}>
           <Route index element={<SearchPage />} />
           <Route path="locations/" element={<SearchPage />} />
-          <Route path="locations/create" element={<CreateLocationPage />} />
+          <Route path="locations/create" element={<CreatePage />} />
           <Route path="locations/:locationId" element={<DisplayLocationPage />} />
         </Route>
       </Routes>

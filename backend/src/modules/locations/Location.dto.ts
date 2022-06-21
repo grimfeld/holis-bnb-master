@@ -32,7 +32,7 @@ export class CreateLocationDto {
   @IsNumber()
   numberOfRooms: number;
 
-  @IsNumber()
+  @IsString()
   categoryName: string;
 }
 

@@ -32,7 +32,6 @@ const DisplayLocationPage: React.FC<DisplayLocationPageProps> = () => {
   useEffect(() => {
     try {
       getLocation().then((data: Location) => setLocation(data));
-
       eventBus.on('location_data_update', () => [
         getLocation().then((data: Location) => setLocation(data))
       ]);
@@ -52,8 +51,6 @@ const DisplayLocationPage: React.FC<DisplayLocationPageProps> = () => {
       getCategory(location.categoryId).then((data: Category) => setCategory(data));
     }
   }, [location]);
-
-  if (!location) return <>Loading...</>;
 
   // Create a function to handle price change and persist it to database
 
@@ -95,6 +92,8 @@ const DisplayLocationPage: React.FC<DisplayLocationPageProps> = () => {
       </>
     );
   }
+
+  if (!location) return <>Loading...</>;
 
   return (
     <div className="text-gray-600">

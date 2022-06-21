@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Category } from '../categories/Category.entity';
 import { CreateLocationDto, ChangeLocationPriceDto } from './Location.dto';
 import { Location } from './Location.entity';
@@ -25,30 +25,31 @@ export class LocationService {
 
   async createLocation(location: CreateLocationDto) {
     // Get category from provided name
-    const category = await this.categoryRepository.findOne({
+    let category = await this.categoryRepository.findOne({
       where: { name: location.categoryName },
     });
 
     // Check if category exists and create it if not
     if (category === undefined) {
-      const newCategory = new Category();
-      newCategory.name = location.categoryName;
-      newCategory.description = 'New Description';
-      this.categoryRepository.create(newCategory);
+      category = await this.categoryRepository.save({
+        name: location.categoryName,
+        description: 'New Description',
+      });
     }
 
-    // Create location instance and create a new entry in database
-    const newLocation = new Location();
-    newLocation.title = location.title;
-    newLocation.description = location.description;
-    newLocation.location = location.location;
-    newLocation.picture = location.picture;
-    newLocation.price = location.price;
-    newLocation.stars = location.stars;
-    newLocation.numberOfRooms = location.numberOfRooms;
-    newLocation.categoryId = category.id;
+    const totalLocations = await this.locationRepository.count();
 
-    return this.locationRepository.create(newLocation);
+    return await this.locationRepository.save({
+      id: totalLocations + 1,
+      title: location.title,
+      description: location.description,
+      location: location.location,
+      picture: location.picture,
+      stars: location.stars,
+      numberOfRooms: location.numberOfRooms,
+      price: location.price,
+      categoryId: category.id,
+    });
   }
 
   async changeLocationPrice(id: number, priceDto: ChangeLocationPriceDto) {

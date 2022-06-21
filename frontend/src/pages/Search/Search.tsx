@@ -6,6 +6,7 @@ import './Search.css';
 import eventBus from '../../utils/EventBus';
 import { useNavigate } from 'react-router-dom';
 import ErrorHandler from '../../components/ErrorHandler';
+import Button from '../../components/Form/Button';
 
 type SearchPageProps = {};
 
@@ -76,6 +77,11 @@ const SearchPage: React.FC<SearchPageProps> = () => {
   return (
     /* List of sorted locations card */
     <div className="search">
+      <div className="flex justify-end">
+        <Button className="my-4 " onClick={() => navigate('/locations/create')}>
+          Create a new location
+        </Button>
+      </div>
       {categories.map((category: Category) => (
         <div
           key={category.id}
@@ -99,8 +105,10 @@ const SearchPage: React.FC<SearchPageProps> = () => {
                   .sort((a, b) => a - b)
               )
             ).map((numberOfRooms: number) => (
-              <div key={numberOfRooms} className="flex flex-wrap gap-8">
-                <div className="w-1/5">
+              <div
+                key={numberOfRooms}
+                className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                <div>
                   <h3 className="text-2xl font-bold">
                     {numberOfRooms} room{numberOfRooms > 1 ? 's' : ''}
                   </h3>
@@ -113,7 +121,6 @@ const SearchPage: React.FC<SearchPageProps> = () => {
                     <LocationCard
                       key={location.id}
                       {...location}
-                      className="w-1/5"
                       onClick={() => navigate(`/locations/${location.id}`)}
                     />
                   ))}
