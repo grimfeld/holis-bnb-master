@@ -5,6 +5,7 @@ import LocationCard from '../../components/LocationCard';
 import './Search.css';
 import eventBus from '../../utils/EventBus';
 import { useNavigate } from 'react-router-dom';
+import ErrorHandler from '../../components/ErrorHandler';
 
 type SearchPageProps = {};
 
@@ -13,28 +14,33 @@ const SearchPage: React.FC<SearchPageProps> = () => {
 
   // Create a function to fetch all locations from database
 
+  const [pending, setPending] = useState(true);
   const [locations, setLocations] = useState<Location[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [error, setError] = useState<string>('');
+  const [query, setQuery] = useState<string>('');
 
-  const getLocations = async () => {
+  const getLocations = async (): Promise<Location[]> => {
     const res = await fetch(`http://localhost:8000/locations`);
     return await res.json();
   };
 
-  const getCategories = async () => {
+  const getCategories = async (): Promise<Category[]> => {
     const res = await fetch(`http://localhost:8000/categories`);
     return await res.json();
   };
 
   useEffect(() => {
-    getLocations().then((res: Location[]) => setLocations(res));
-    getCategories().then((res: Category[]) => setCategories(res));
-    eventBus.on('search_input_changed', (query: string) => {
-      setLocations(searchLocations(query));
-    });
-    return () =>
-      eventBus.remove('search_input_changed', (query: string) => {
-        setLocations(searchLocations(query));
+    Promise.all([getLocations(), getCategories()])
+      .then(([locations, categories]) => {
+        setLocations(locations);
+        setCategories(categories);
+        eventBus.on('search_input_changed', (query: string) => setQuery(query));
+        setPending(false);
+      })
+      .catch((err) => {
+        if (err instanceof Error) setError(err.message);
+        else setError('Something went wrong');
       });
   }, []);
 
@@ -44,12 +50,28 @@ const SearchPage: React.FC<SearchPageProps> = () => {
 
   // Bonus: Create a search function linked to the search input in the header
 
-  const searchLocations = (query: string) => {
-    const filteredLocations = locations.filter((location: Location) => {
-      return location.title.toLowerCase().includes(query.toLowerCase());
-    });
-    return filteredLocations;
-  };
+  useEffect(() => {
+    if (query) {
+      getLocations().then((locations: Location[]) => {
+        const filteredLocations = locations.filter((location: Location) => {
+          return location.title.toLowerCase().includes(query.toLowerCase());
+        });
+        setLocations(filteredLocations);
+      });
+    } else {
+      getLocations().then((data: Location[]) => setLocations(data));
+    }
+  }, [query]);
+
+  if (error) {
+    return (
+      <>
+        <ErrorHandler message={error} />
+      </>
+    );
+  }
+
+  if (pending) return <div className="search">Loading...</div>;
 
   return (
     /* List of sorted locations card */
@@ -66,7 +88,7 @@ const SearchPage: React.FC<SearchPageProps> = () => {
             'mb-20'
           ].join(' ')}>
           <h2 className="text-4xl font-bold capitalize">{category.name}</h2>
-          <div className="w-full h-px bg-gray-300 my-6" />
+          <div className="w-full h-px my-6 bg-gray-300" />
           <div className="flex flex-col gap-y-8">
             {/* Creating an array containing only once the different number of rooms from the list of locations in the category */}
             {Array.from(
