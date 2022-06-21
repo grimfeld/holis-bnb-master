@@ -6,6 +6,7 @@ import Location from '../../types/Location';
 import { useParams } from 'react-router-dom';
 import eventBus from '../../utils/EventBus';
 import Category from '../../types/Category';
+import ErrorHandler from '../../components/ErrorHandler';
 
 type DisplayLocationPageProps = {};
 
@@ -16,6 +17,7 @@ const DisplayLocationPage: React.FC<DisplayLocationPageProps> = () => {
   const [category, setCategory] = useState<Category>();
 
   const [price, setPrice] = useState<number>(0);
+  const [error, setError] = useState<string>('');
 
   const getLocation = async () => {
     const res = await fetch(`http://localhost:8000/locations/${locationId}`);
@@ -28,16 +30,21 @@ const DisplayLocationPage: React.FC<DisplayLocationPageProps> = () => {
   };
 
   useEffect(() => {
-    getLocation().then((data: Location) => setLocation(data));
+    try {
+      getLocation().then((data: Location) => setLocation(data));
 
-    eventBus.on('location_data_update', () => [
-      getLocation().then((data: Location) => setLocation(data))
-    ]);
-    return () => {
-      eventBus.remove('location_data_update', () => {
-        getLocation().then((data: Location) => setLocation(data));
-      });
-    };
+      eventBus.on('location_data_update', () => [
+        getLocation().then((data: Location) => setLocation(data))
+      ]);
+      return () => {
+        eventBus.remove('location_data_update', () => {
+          getLocation().then((data: Location) => setLocation(data));
+        });
+      };
+    } catch (error) {
+      if (error instanceof Error) setError(error.message);
+      else setError('Something went wrong');
+    }
   }, [locationId]);
 
   useEffect(() => {
@@ -51,25 +58,43 @@ const DisplayLocationPage: React.FC<DisplayLocationPageProps> = () => {
   // Create a function to handle price change and persist it to database
 
   const handlePriceChange = async () => {
-    await fetch(`http://localhost:8000/locations/${locationId}/price`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ price: price })
-    });
-    // if (res.status === 200) return alert('Price updated');
-    eventBus.dispatch('location_data_update');
+    try {
+      await fetch(`http://localhost:8000/locations/${locationId}/price`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ price: price })
+      });
+      // if (res.status === 200) return alert('Price updated');
+      eventBus.dispatch('location_data_update');
+    } catch (error) {
+      if (error instanceof Error) setError(error.message);
+      else setError('Something went wrong');
+    }
   };
 
   // Create a function to delete the location and persist it to database
 
-  // const handleLocationDeletion = async () => {
-  //   const res = await fetch(`http://localhost:8000/locations/${locationId}`, {
-  //     method: 'DELETE'
-  //   });
-  //   return await res.json();
-  // };
+  const handleLocationDeletion = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/locations/${locationId}`, {
+        method: 'DELETE'
+      });
+      return await res.json();
+    } catch (error) {
+      if (error instanceof Error) setError(error.message);
+      else setError('Something went wrong');
+    }
+  };
+
+  if (error) {
+    return (
+      <>
+        <ErrorHandler message={error} />
+      </>
+    );
+  }
 
   return (
     <div className="text-gray-600">
@@ -78,7 +103,7 @@ const DisplayLocationPage: React.FC<DisplayLocationPageProps> = () => {
         alt={location.title}
         className="object-cover w-full max-h-[500px]"
       />
-      <div className="flex gap-16 py-16 px-32 m-auto">
+      <div className="flex gap-16 px-32 py-16 m-auto">
         <div className="flex flex-col gap-y-4">
           <div className="flex justify-between">
             <h1 className="text-4xl font-bold">{location.title}</h1>
@@ -94,23 +119,24 @@ const DisplayLocationPage: React.FC<DisplayLocationPageProps> = () => {
           </p>
           <p>{location.description}</p>
         </div>
-        <div className="border border-gray-400 p-4 rounded-xl flex flex-col gap-y-4">
+        <div className="flex flex-col p-4 border border-gray-400 rounded-xl gap-y-4">
           <h2>Modify price</h2>
           <input
             type="number"
             onChange={(e) => setPrice(e.target.valueAsNumber)}
-            className="py-2 px-4 rounded-full shadow-sm shadow-gray-400"
+            className="px-4 py-2 rounded-full shadow-sm shadow-gray-400"
           />
           <div className="flex justify-between gap-x-2">
             <button
               type="button"
-              className="w-full border py-2 px-4 rounded-full border-primary text-primary">
+              onClick={handleLocationDeletion}
+              className="w-full px-4 py-2 border rounded-full border-primary text-primary">
               Delete
             </button>
             <button
               type="button"
               onClick={handlePriceChange}
-              className="w-full py-2 px-4 rounded-full bg-primary text-white">
+              className="w-full px-4 py-2 text-white rounded-full bg-primary">
               Confirm
             </button>
           </div>
